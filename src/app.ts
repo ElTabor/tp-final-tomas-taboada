@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import connectDB from "./config/db";
 
 import authRoutes from "./routes/auth.routes";
-import taskRoutes from "./routes/task.routes";
 import ownerRoutes from "./routes/owner.routes";
 import petRoutes from "./routes/pet.routes";
 import veterinarianRoutes from "./routes/veterinarian.routes";
@@ -29,7 +28,7 @@ app.use("/api/owners", authMiddleware, ownerRoutes);
 app.use("/api/pets", authMiddleware, petRoutes);
 app.use("/api/veterinarians", authMiddleware, veterinarianRoutes);
 app.use("/api/medical-records", authMiddleware, medicalRecordRoutes);
-app.use("/api/tasks", authMiddleware, taskRoutes);
+
 
 app.use(errorHandler);
 

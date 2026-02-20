@@ -77,6 +77,18 @@ npx ts-node src/scripts/seed.ts
 
 ---
 
+## 🔑 Variables de Entorno Requeridas
+
+Para que el backend funcione correctamente, es necesario configurar un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+*   **PORT**: Puerto en el que correrá el servidor backend (ej: `3000`).
+*   **MONGO_URI**: URL de conexión a tu clúster de MongoDB (Local o MongoDB Atlas).
+*   **JWT_ACCESS_SECRET**: Clave secreta aleatoria para firmar los JSON Web Tokens de acceso.
+*   **JWT_REFRESH_SECRET**: Clave secreta aleatoria para firmar los tokens de refresco.
+*   **JWT_EXPIRES_IN**: Tiempo de validez previsto para los tokens (ej: `1d`, `24h`).
+
+---
+
 ## 📡 Endpoints Principales (API)
 
 ### Autenticación
@@ -119,3 +131,38 @@ El frontend fue desarrollado íntegramente en **React** utilizando el bundle too
 - **Modales de Confirmación**: Para todas las acciones destructivas (Eliminar).
 - **Responsive Design**: Adaptado para móviles y desktop.
 - **Dark/Light Mode**: Soporte nativo para temas de color.
+
+---
+
+## 📂 Estructura del Proyecto
+
+Aquí se detalla la estructura de carpetas del repositorio:
+
+```text
+.
+├── .env.example
+├── package.json
+├── README.md
+├── tsconfig.json
+├── src/
+│   ├── app.ts
+│   ├── config/
+│   ├── controllers/
+│   ├── dtos/
+│   ├── middlewares/
+│   ├── models/
+│   ├── routes/
+│   ├── scripts/
+│   ├── services/
+│   └── validators/
+└── frontend/
+    ├── index.html
+    ├── vite.config.ts
+    └── src/
+        ├── components/
+        ├── views/
+        ├── App.tsx
+        ├── main.tsx
+        └── index.css
+```
+

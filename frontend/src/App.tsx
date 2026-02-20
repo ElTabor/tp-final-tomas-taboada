@@ -13,7 +13,7 @@ import { VeterinariansView } from './views/VeterinariansView';
 import { MedicalRecordsView } from './views/MedicalRecordsView';
 
 // Types
-interface Task { _id: string; title: string; completed: boolean; }
+
 interface Owner { _id: string; fullName: string; phone: string; address?: string; }
 interface Pet { _id: string; name: string; species: string; birthDate: string; ownerId: Owner | string; }
 interface Veterinarian { _id: string; fullName: string; licenseNumber: string; specialty: string; }
