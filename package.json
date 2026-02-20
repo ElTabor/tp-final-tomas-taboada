@@ -4,22 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev src/index.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ElTabor/TP-FullStack.git"
+    "url": "git+https://github.com/ElTabor/tp-final-tomas-taboada.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/ElTabor/TP-FullStack/issues"
+    "url": "https://github.com/ElTabor/tp-final-tomas-taboada/issues"
   },
-  "homepage": "https://github.com/ElTabor/TP-FullStack#readme",
+  "homepage": "https://github.com/ElTabor/tp-final-tomas-taboada#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
