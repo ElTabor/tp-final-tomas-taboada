@@ -48,7 +48,7 @@ export const TopBar: React.FC<TopBarProps> = ({ title, activeTab, setActiveTab, 
 
                 {/* Center: Clinic Name */}
                 <div className="flex-1 flex justify-center">
-                    <h1 className="text-2xl font-bold tracking-tight text-primary text-center truncate">
+                    <h1 className="text-3xl font-bold tracking-tight text-primary text-center truncate font-logo">
                         Patitas Felices
                     </h1>
                 </div>

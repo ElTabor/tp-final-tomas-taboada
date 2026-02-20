@@ -11,7 +11,6 @@
 @layer components {
   .vet-pattern {
     background-color: #fcf9fd;
-    /* Extremely soft version of the primary color */
   }
 
   .dark .vet-pattern {

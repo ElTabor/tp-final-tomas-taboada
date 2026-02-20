@@ -10,6 +10,7 @@ interface LoginViewProps {
     setEmail: (val: string) => void;
     password: string;
     setPassword: (val: string) => void;
+    loginError: string | null;
 }
 
 export const LoginView: React.FC<LoginViewProps> = ({
@@ -19,7 +20,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
     email,
     setEmail,
     password,
-    setPassword
+    setPassword,
+    loginError
 }) => {
     return (
         <div className="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display vet-pattern">
@@ -29,7 +31,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary/20 text-primary mb-4">
                         <span className="material-icons text-4xl">pets</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-800 dark:text-white">Patitas Felices</h1>
+                    <h1 className="text-4xl font-bold text-slate-800 dark:text-white font-logo tracking-wide">Patitas Felices</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2">Professional Veterinary Management</p>
                 </div>
 
@@ -41,7 +43,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
                             {authMode === 'login'
-                                ? 'Log in to manage owners, pets, and appointments.'
+                                ? 'Log in to manage owners, pets, appointments and staff.'
                                 : 'Register your clinic to start managing your patients.'}
                         </p>
                     </div>
@@ -55,6 +57,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            error={!!loginError}
+                            errorText={loginError || undefined}
                         />
                         <Input
                             label="Password"
@@ -64,46 +68,16 @@ export const LoginView: React.FC<LoginViewProps> = ({
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            error={!!loginError}
+                            errorText={loginError || undefined}
                         />
 
-                        {authMode === 'login' && (
-                            <div className="flex items-center">
-                                <input
-                                    id="remember"
-                                    className="h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary"
-                                    type="checkbox"
-                                />
-                                <label className="ml-2 block text-sm text-slate-600 dark:text-slate-400" htmlFor="remember">
-                                    Stay signed in
-                                </label>
-                            </div>
-                        )}
+
 
                         <Button type="submit" className="w-full py-3" icon="login">
                             {authMode === 'login' ? 'Sign In to Dashboard' : 'Register Clinic'}
                         </Button>
                     </form>
-
-                    {/* Divider */}
-                    <div className="relative my-8">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white dark:bg-slate-900 text-slate-400">Secure Access</span>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3">
-                        <button className="flex items-center justify-center px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium text-slate-400 dark:text-slate-600 bg-slate-50/50 dark:bg-slate-800/50 cursor-not-allowed opacity-50 grayscale pointer-events-none">
-                            <img
-                                alt="Google"
-                                className="w-4 h-4 mr-2 opacity-40 grayscale"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbU-pRePMMC_uPZzfAwlLMRFo9kTZeeU6ytxMFKbJlImdDdeMWjko2YVYVeage_Ka5pF0b5oTTudUhZwRTMIWi3f8xt4n6S96c7_WeTnOGOoHKTMSV9-BwpHSMjGfpsa0ekDjYpj8n-saiwErS1AE2UR_G5MJ35Iv8IEh56_S2W9iUrgvhLnJSadKK5aIQQVXNLNBy6qgMo4v2JLsDaheQwiD5u2S1Wi0jScIiGAD7v-LUfoSHCfIE6-o6QZl233rhXEy-7kOWV4Y"
-                            />
-                            Corporate SSO (Unavailable)
-                        </button>
-                    </div>
                 </div>
 
                 {/* Footer Links */}
@@ -113,7 +87,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                         onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
                         className="font-bold text-primary hover:underline decoration-2 underline-offset-4"
                     >
-                        {authMode === 'login' ? 'Register Clinic' : 'Log In'}
+                        {authMode === 'login' ? 'Register' : 'Log In'}
                     </button>
                 </p>
 

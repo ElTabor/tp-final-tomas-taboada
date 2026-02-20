@@ -39,6 +39,7 @@ function App() {
     const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [loginError, setLoginError] = useState<string | null>(null);
 
     // Form States
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -94,6 +95,7 @@ function App() {
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoginError(null);
             const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
             const res = await axios.post<{ accessToken: string; role?: string }>(endpoint, { email, password });
             const token = res.data.accessToken;
@@ -108,7 +110,7 @@ function App() {
             }
         } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || 'Auth failed';
-            alert(errorMsg);
+            setLoginError(errorMsg);
         }
     };
 
@@ -310,9 +312,10 @@ function App() {
                 setAuthMode={setAuthMode}
                 handleAuth={handleAuth}
                 email={email}
-                setEmail={setEmail}
+                setEmail={(val) => { setEmail(val); setLoginError(null); }}
                 password={password}
-                setPassword={setPassword}
+                setPassword={(val) => { setPassword(val); setLoginError(null); }}
+                loginError={loginError}
             />
         );
     }
