@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { ConfirmModal } from '../components/ui/Modal';
 
 interface Owner {
     _id: string;
@@ -29,6 +30,7 @@ interface OwnersViewProps {
     expandedOwnerId?: string | null;
     setExpandedOwnerId?: (id: string | null) => void;
     onPetClick?: (petId: string) => void;
+    onCancel: () => void;
 }
 
 export const OwnersView: React.FC<OwnersViewProps> = ({
@@ -42,9 +44,11 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
     editingId,
     expandedOwnerId,
     setExpandedOwnerId,
-    onPetClick
+    onPetClick,
+    onCancel
 }) => {
     const [expandedOwner, setExpandedOwner] = React.useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = React.useState('');
 
     React.useEffect(() => {
         if (expandedOwnerId) {
@@ -69,7 +73,11 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
         setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
     };
 
-    const sortedOwners = [...owners].sort((a, b) => {
+    const filteredOwners = owners.filter(owner =>
+        owner.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const sortedOwners = [...filteredOwners].sort((a, b) => {
         const nameA = a.fullName.toLowerCase();
         const nameB = b.fullName.toLowerCase();
         if (sortDirection === 'asc') {
@@ -78,8 +86,33 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
             return nameB.localeCompare(nameA);
         }
     });
+
+    const [deletingId, setDeletingId] = React.useState<string | null>(null);
+
+    const handleDeleteClick = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDeletingId(id);
+    };
+
+    const confirmDelete = () => {
+        if (deletingId) {
+            onDelete(deletingId);
+            setDeletingId(null);
+        }
+    };
+
     return (
         <div className="space-y-8">
+            <ConfirmModal
+                isOpen={!!deletingId}
+                onClose={() => setDeletingId(null)}
+                onConfirm={confirmDelete}
+                title="Delete Owner"
+                message="Are you sure you want to delete this owner? This action cannot be undone and will also delete all associated pets and medical records."
+                confirmText="Delete Owner"
+                isDestructive
+            />
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Owners Management</h2>
@@ -90,8 +123,8 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
                 </div>
             </div>
 
-            <Card title={editingId ? "Edit Owner" : "Register New Owner"}>
-                <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <Card title={editingId ? `Editando Dueño: ${ownerForm.fullName}` : "Register New Owner"}>
+                <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <Input
                         label="Full Name"
                         placeholder="e.g. Alejandro Martinez"
@@ -112,9 +145,16 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
                         value={ownerForm.address}
                         onChange={(e) => setOwnerForm({ ...ownerForm, address: e.target.value })}
                     />
-                    <Button type="submit" className="w-full mb-0.5" icon={editingId ? "save" : "add"}>
-                        {editingId ? "Update Owner" : "Add New Owner"}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button type="submit" className="flex-1 mb-0.5" icon={editingId ? "save" : "add"}>
+                            {editingId ? "Update" : "Register"}
+                        </Button>
+                        {editingId && (
+                            <Button variant="ghost" type="button" onClick={onCancel} className="mb-0.5" icon="close">
+                                Cancel
+                            </Button>
+                        )}
+                    </div>
                 </form>
             </Card>
 
@@ -123,14 +163,30 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                                <th
-                                    className="px-6 py-3 cursor-pointer hover:text-primary transition-colors flex items-center gap-2 group/header"
-                                    onClick={toggleSort}
-                                >
-                                    Owner
-                                    <span className="material-icons text-sm text-primary">
-                                        {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                                    </span>
+                                <th className="px-6 py-3">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors group/header"
+                                            onClick={toggleSort}
+                                        >
+                                            Owner
+                                            <span className="material-icons text-sm text-primary">
+                                                {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
+                                            </span>
+                                        </div>
+
+                                        <div className="relative">
+                                            <span className="material-icons absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">search</span>
+                                            <input
+                                                type="text"
+                                                placeholder="Filter..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="pl-7 pr-2 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-primary w-24 focus:w-32 transition-all"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </div>
+                                    </div>
                                 </th>
                                 <th className="px-6 py-3">Phone</th>
                                 <th className="px-6 py-3">Address</th>
@@ -189,7 +245,7 @@ export const OwnersView: React.FC<OwnersViewProps> = ({
                                                             <span className="material-icons text-lg">edit</span>
                                                         </button>
                                                         <button
-                                                            onClick={() => onDelete(owner._id)}
+                                                            onClick={(e) => handleDeleteClick(owner._id, e)}
                                                             className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 rounded-lg transition-colors"
                                                             title="Delete"
                                                         >

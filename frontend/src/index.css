@@ -10,13 +10,11 @@
 
 @layer components {
   .vet-pattern {
-    background-color: #f7f5f8;
-    background-image: radial-gradient(#66068d22 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-color: #fcf9fd;
+    /* Extremely soft version of the primary color */
   }
 
   .dark .vet-pattern {
     background-color: #1d1022;
-    background-image: radial-gradient(#66068d44 1px, transparent 1px);
   }
 }

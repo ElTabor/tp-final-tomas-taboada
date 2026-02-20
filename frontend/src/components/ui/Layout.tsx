@@ -1,5 +1,4 @@
 import React from 'react';
-import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
 interface LayoutProps {
@@ -8,26 +7,22 @@ interface LayoutProps {
     setActiveTab: (tab: any) => void;
     onLogout: () => void;
     title: string;
+    userRole?: 'admin' | 'veterinarian' | 'user';
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onLogout, title }) => {
-    const [isCollapsed, setIsCollapsed] = React.useState(false);
-
+export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, onLogout, title, userRole }) => {
     return (
-        <div className="flex h-screen overflow-hidden bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
-            <Sidebar
+        <div className="flex flex-col h-screen overflow-hidden bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+            <TopBar
+                title={title}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 onLogout={onLogout}
-                isCollapsed={isCollapsed}
-                setIsCollapsed={setIsCollapsed}
+                userRole={userRole}
             />
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                <TopBar title={title} />
-                <main className="flex-1 overflow-y-auto p-8 space-y-8 vet-pattern scroll-smooth">
-                    {children}
-                </main>
-            </div>
+            <main className="flex-1 overflow-y-auto p-8 space-y-8 vet-pattern scroll-smooth">
+                {children}
+            </main>
         </div>
     );
 };

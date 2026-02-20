@@ -46,9 +46,7 @@ function App() {
     const [petForm, setPetForm] = useState({ name: '', species: '', birthDate: '', ownerId: '' });
     const [vetForm, setVetForm] = useState({ fullName: '', licenseNumber: '', specialty: '' });
     const [recordForm, setRecordForm] = useState({ petId: '', veterinarianId: '', date: '', time: '', description: '', ownerId: '' });
-    const [activities, setActivities] = useState<Activity[]>([
-        { id: '1', label: 'System ready', time: 'Just now', active: true }
-    ]);
+    const [activities, setActivities] = useState<Activity[]>([]);
 
     const addActivity = (label: string) => {
         const newActivity: Activity = {
@@ -65,42 +63,27 @@ function App() {
         const role = localStorage.getItem('role') as 'admin' | 'veterinarian' | 'user' | null;
         if (token && role) {
             setUser({ token, role });
-            loadAllData(token, role);
+            loadAllData(token);
         } else {
             setLoading(false);
         }
     }, []);
 
-    const loadAllData = async (token: string, role: 'admin' | 'veterinarian' | 'user') => {
+    const loadAllData = async (token: string) => {
         setLoading(true);
         const config = { headers: { Authorization: `Bearer ${token}` } };
         try {
-            // Veterinarians can only access medical records
-            if (role === 'veterinarian') {
-                const m = await axios.get('/api/medical-records', config).catch(() => ({ data: [] }));
-                setMedicalRecords(m.data);
-                // Load minimal data for dropdowns in appointment form
-                const [p, v, o] = await Promise.all([
-                    axios.get('/api/pets', config).catch(() => ({ data: [] })),
-                    axios.get('/api/veterinarians', config).catch(() => ({ data: [] })),
-                    axios.get('/api/owners', config).catch(() => ({ data: [] }))
-                ]);
-                setPets(p.data);
-                setVeterinarians(v.data);
-                setOwners(o.data);
-            } else {
-                // Admins can access everything
-                const [o, p, v, m] = await Promise.all([
-                    axios.get('/api/owners', config).catch(() => ({ data: [] })),
-                    axios.get('/api/pets', config).catch(() => ({ data: [] })),
-                    axios.get('/api/veterinarians', config).catch(() => ({ data: [] })),
-                    axios.get('/api/medical-records', config).catch(() => ({ data: [] }))
-                ]);
-                setOwners(o.data);
-                setPets(p.data);
-                setVeterinarians(v.data);
-                setMedicalRecords(m.data);
-            }
+            // Load all data regardless of role
+            const [o, p, v, m] = await Promise.all([
+                axios.get('/api/owners', config).catch(() => ({ data: [] })),
+                axios.get('/api/pets', config).catch(() => ({ data: [] })),
+                axios.get('/api/veterinarians', config).catch(() => ({ data: [] })),
+                axios.get('/api/medical-records', config).catch(() => ({ data: [] }))
+            ]);
+            setOwners(o.data);
+            setPets(p.data);
+            setVeterinarians(v.data);
+            setMedicalRecords(m.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -119,9 +102,9 @@ function App() {
                 localStorage.setItem('token', token);
                 localStorage.setItem('role', role);
                 setUser({ token, role: role as 'admin' | 'veterinarian' | 'user' });
-                await loadAllData(token, role as 'admin' | 'veterinarian' | 'user');
-                setActiveTab(role === 'veterinarian' ? 'medicalRecords' : 'dashboard');
-                addActivity(`User logged in as ${role}`);
+                await loadAllData(token);
+                setActiveTab('dashboard');
+                // Removed login activity log
             }
         } catch (err: any) {
             const errorMsg = err.response?.data?.message || err.message || 'Auth failed';
@@ -156,6 +139,21 @@ function App() {
         } catch (err: any) {
             console.error(err);
             alert("Error saving owner: " + (err.response?.data?.message || err.message));
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setOwnerForm({ fullName: '', phone: '', address: '' });
+        setPetForm({ name: '', species: '', birthDate: '', ownerId: '' });
+        setVetForm({ fullName: '', licenseNumber: '', specialty: '' });
+        setRecordForm({ petId: '', veterinarianId: '', date: '', time: '', description: '', ownerId: '' });
+    };
+
+    const scrollToForm = () => {
+        const formElement = document.querySelector('form');
+        if (formElement) {
+            formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     };
 
@@ -351,7 +349,12 @@ function App() {
                         onSubmit={handleOwnerSubmit}
                         onDelete={deleteOwner}
                         editingId={editingId}
-                        onEdit={(o) => { setEditingId(o._id); setOwnerForm({ fullName: o.fullName, phone: o.phone, address: o.address || '' }); }}
+                        onEdit={(o) => {
+                            setEditingId(o._id);
+                            setOwnerForm({ fullName: o.fullName, phone: o.phone, address: o.address || '' });
+                            scrollToForm();
+                        }}
+                        onCancel={handleCancelEdit}
                         expandedOwnerId={expandedOwnerId}
                         setExpandedOwnerId={setExpandedOwnerId}
                         onPetClick={(petId) => {
@@ -370,7 +373,12 @@ function App() {
                         onSubmit={handlePetSubmit}
                         onDelete={deletePet}
                         editingId={editingId}
-                        onEdit={(p) => { setEditingId(p._id); setPetForm({ name: p.name, species: p.species, birthDate: p.birthDate ? p.birthDate.split('T')[0] : '', ownerId: typeof p.ownerId === 'object' ? p.ownerId._id : p.ownerId }); }}
+                        onEdit={(p) => {
+                            setEditingId(p._id);
+                            setPetForm({ name: p.name, species: p.species, birthDate: p.birthDate ? p.birthDate.split('T')[0] : '', ownerId: typeof p.ownerId === 'object' ? p.ownerId._id : p.ownerId });
+                            scrollToForm();
+                        }}
+                        onCancel={handleCancelEdit}
                         onOwnerClick={(ownerId) => {
                             setExpandedOwnerId(ownerId);
                             setActiveTab('owners');
@@ -388,7 +396,12 @@ function App() {
                         onSubmit={handleVetSubmit}
                         onDelete={deleteVet}
                         editingId={editingId}
-                        onEdit={(v) => { setEditingId(v._id); setVetForm({ fullName: v.fullName, licenseNumber: v.licenseNumber, specialty: v.specialty }); }}
+                        onEdit={(v) => {
+                            setEditingId(v._id);
+                            setVetForm({ fullName: v.fullName, licenseNumber: v.licenseNumber, specialty: v.specialty });
+                            scrollToForm();
+                        }}
+                        onCancel={handleCancelEdit}
                     />
                 );
             case 'medicalRecords':
@@ -416,7 +429,9 @@ function App() {
                                 description: m.description,
                                 ownerId: oId
                             });
+                            scrollToForm();
                         }}
+                        onCancel={handleCancelEdit}
                         owners={owners}
                     />
                 );
@@ -437,7 +452,7 @@ function App() {
     };
 
     return (
-        <Layout activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} title={getTitle()}>
+        <Layout activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} title={getTitle()} userRole={user?.role}>
             {renderContent()}
         </Layout>
     );

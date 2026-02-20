@@ -3,6 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
+import { ConfirmModal } from '../components/ui/Modal';
 
 interface Owner { _id: string; fullName: string; }
 interface Pet { _id: string; name: string; ownerId: string | any; }
@@ -29,6 +30,7 @@ interface MedicalRecordsViewProps {
     onDelete: (id: string) => void;
     onEdit: (record: MedicalRecord) => void;
     editingId: string | null;
+    onCancel: () => void;
 }
 
 export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
@@ -41,7 +43,8 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
     onSubmit,
     onDelete,
     onEdit,
-    editingId
+    editingId,
+    onCancel
 }) => {
     const [sortBy, setSortBy] = React.useState<string>('date');
     const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('desc');
@@ -140,8 +143,32 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
         }
         setRecordForm({ ...recordForm, ownerId, petId: newPetId });
     };
+    const [deletingId, setDeletingId] = React.useState<string | null>(null);
+
+    const handleDeleteClick = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDeletingId(id);
+    };
+
+    const confirmDelete = () => {
+        if (deletingId) {
+            onDelete(deletingId);
+            setDeletingId(null);
+        }
+    };
+
     return (
         <div className="space-y-8">
+            <ConfirmModal
+                isOpen={!!deletingId}
+                onClose={() => setDeletingId(null)}
+                onConfirm={confirmDelete}
+                title="Delete Appointment"
+                message="Are you sure you want to delete this appointment? This action cannot be undone."
+                confirmText="Delete Appointment"
+                isDestructive
+            />
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Appointments & Records</h2>
@@ -149,7 +176,7 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
                 </div>
             </div>
 
-            <Card title={editingId ? "Edit Appointment" : "Log New Appointment"}>
+            <Card title={editingId ? `Editando Turno: ${pets.find(p => p._id === recordForm.petId)?.name || 'Mascota'}` : "Log New Appointment"}>
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Select
@@ -191,31 +218,28 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
                             />
                         </div>
                         <div className="md:col-span-1">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                                Time <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                className="block w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none"
+                            <Select
+                                label="Time"
+                                icon="schedule"
+                                placeholder="Select Time"
                                 value={recordForm.time}
-                                onChange={(e) => setRecordForm({ ...recordForm, time: e.target.value })}
-                                required
-                            >
-                                <option value="">Select Time</option>
-                                {Array.from({ length: 17 }).map((_, i) => {
+                                options={Array.from({ length: 17 }).map((_, i) => {
                                     const h = Math.floor(i / 2) + 9;
                                     const m = (i % 2) * 30;
                                     const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                                    return <option key={timeStr} value={timeStr}>{timeStr}</option>;
+                                    return { value: timeStr, label: timeStr };
                                 })}
-                            </select>
+                                onChange={(val) => setRecordForm({ ...recordForm, time: val })}
+                                required
+                            />
                         </div>
                         <div className="md:col-span-4">
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                                Description (Details & Treatment) <span className="text-red-500">*</span>
+                                Description <span className="text-red-500">*</span>
                             </label>
                             <textarea
                                 className="block w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none min-h-[100px] resize-y"
-                                placeholder="Log symptoms, clinical findings, diagnosis, or treatment plan..."
+                                placeholder="Log symptoms, observations, details..."
                                 value={recordForm.description}
                                 onChange={(e) => setRecordForm({ ...recordForm, description: e.target.value })}
                                 required
@@ -223,9 +247,14 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-2">
+                    <div className="flex justify-end gap-2 pt-2">
+                        {editingId && (
+                            <Button variant="ghost" type="button" onClick={onCancel} icon="close">
+                                Cancel
+                            </Button>
+                        )}
                         <Button type="submit" icon={editingId ? "save" : "add"} className="px-12">
-                            {editingId ? "Update Appointment" : "Add Appointment"}
+                            {editingId ? "Update" : "Add Appointment"}
                         </Button>
                     </div>
                 </form>
@@ -261,15 +290,19 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
                                 <th className="px-6 py-3">
                                     <div className="flex items-center gap-2">
                                         Status
-                                        <select
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value as any)}
-                                            className="ml-1 bg-transparent border-none text-[10px] font-bold text-primary focus:ring-0 cursor-pointer outline-none uppercase"
-                                        >
-                                            <option value="all">All</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="completed">Completed</option>
-                                        </select>
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <Select
+                                                value={statusFilter}
+                                                onChange={(val) => setStatusFilter(val as any)}
+                                                options={[
+                                                    { value: 'all', label: 'All' },
+                                                    { value: 'pending', label: 'Pending' },
+                                                    { value: 'completed', label: 'Completed' }
+                                                ]}
+                                                placeholder="Filter"
+                                                className="min-w-[120px]"
+                                            />
+                                        </div>
                                     </div>
                                 </th>
                                 <th className="px-6 py-3 text-right">Actions</th>
@@ -334,7 +367,7 @@ export const MedicalRecordsView: React.FC<MedicalRecordsViewProps> = ({
                                                     <button onClick={() => onEdit(record)} className="p-1.5 hover:bg-primary/10 rounded-lg text-slate-400 hover:text-primary transition-colors">
                                                         <span className="material-icons text-sm">edit</span>
                                                     </button>
-                                                    <button onClick={() => onDelete(record._id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                                                    <button onClick={(e) => handleDeleteClick(record._id, e)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
                                                         <span className="material-icons text-sm">delete</span>
                                                     </button>
                                                 </div>

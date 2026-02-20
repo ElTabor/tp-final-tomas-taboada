@@ -1,0 +1,1 @@
+@tailwind base;@tailwind components;@tailwind utilities;@layer base{body{font-family:Inter,sans-serif}}@layer components{.vet-pattern{background-color:#fcf9fd}.dark .vet-pattern{background-color:#1d1022}}

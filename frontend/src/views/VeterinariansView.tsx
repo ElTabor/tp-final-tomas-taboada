@@ -2,6 +2,8 @@ import React from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Select } from '../components/ui/Select';
+import { ConfirmModal } from '../components/ui/Modal';
 
 interface Veterinarian {
     _id: string;
@@ -18,6 +20,7 @@ interface VeterinariansViewProps {
     onDelete: (id: string) => void;
     onEdit: (vet: Veterinarian) => void;
     editingId: string | null;
+    onCancel: () => void;
 }
 
 export const VeterinariansView: React.FC<VeterinariansViewProps> = ({
@@ -27,10 +30,28 @@ export const VeterinariansView: React.FC<VeterinariansViewProps> = ({
     onSubmit,
     onDelete,
     onEdit,
-    editingId
+    editingId,
+    onCancel
 }) => {
+    const [deletingId, setDeletingId] = React.useState<string | null>(null);
+
     return (
         <div className="space-y-8">
+            <ConfirmModal
+                isOpen={!!deletingId}
+                onClose={() => setDeletingId(null)}
+                onConfirm={() => {
+                    if (deletingId) {
+                        onDelete(deletingId);
+                        setDeletingId(null);
+                    }
+                }}
+                title="Delete Professional"
+                message="Are you sure you want to delete this professional? This action cannot be undone."
+                confirmText="Delete Professional"
+                isDestructive
+            />
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Professionals Management</h2>
@@ -41,8 +62,8 @@ export const VeterinariansView: React.FC<VeterinariansViewProps> = ({
                 </span>
             </div>
 
-            <Card title={editingId ? "Edit Professional" : "Add New Professional"}>
-                <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <Card title={editingId ? `Editando Profesional: ${vetForm.fullName}` : "Add New Professional"}>
+                <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                     <Input
                         label="Full Name"
                         placeholder="e.g. Julian Smith"
@@ -57,16 +78,31 @@ export const VeterinariansView: React.FC<VeterinariansViewProps> = ({
                         onChange={(e) => setVetForm({ ...vetForm, licenseNumber: e.target.value })}
                         required
                     />
-                    <Input
+                    <Select
                         label="Specialty"
-                        placeholder="e.g. Surgery"
+                        icon="medical_services"
+                        placeholder="Select Specialty"
                         value={vetForm.specialty}
-                        onChange={(e) => setVetForm({ ...vetForm, specialty: e.target.value })}
+                        options={[
+                            { value: 'Clínica Médica', label: 'Clínica Médica' },
+                            { value: 'Cirugía', label: 'Cirugía' },
+                            { value: 'Traumatología', label: 'Traumatología' },
+                            { value: 'Dermatología', label: 'Dermatología' },
+                            { value: 'Cardiología', label: 'Cardiología' }
+                        ]}
+                        onChange={(val) => setVetForm({ ...vetForm, specialty: val })}
                         required
                     />
-                    <Button type="submit" className="w-full mb-0.5" icon={editingId ? "save" : "add"}>
-                        {editingId ? "Update Professional" : "Add Professional"}
-                    </Button>
+                    <div className="md:col-span-2 flex gap-2">
+                        <Button type="submit" className="flex-1 mb-0.5" icon={editingId ? "save" : "add"}>
+                            {editingId ? "Update" : "Add New"}
+                        </Button>
+                        {editingId && (
+                            <Button variant="ghost" type="button" onClick={onCancel} className="mb-0.5" icon="close">
+                                Cancel
+                            </Button>
+                        )}
+                    </div>
                 </form>
             </Card>
 
@@ -95,7 +131,7 @@ export const VeterinariansView: React.FC<VeterinariansViewProps> = ({
                             </div>
                             <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
                                 <Button variant="ghost" onClick={() => onEdit(vet)} icon="edit" className="px-3 py-1.5 text-xs">Edit</Button>
-                                <Button variant="ghost" onClick={() => onDelete(vet._id)} icon="delete" className="px-3 py-1.5 text-xs text-red-500 hover:text-red-600">Delete</Button>
+                                <Button variant="ghost" onClick={() => setDeletingId(vet._id)} icon="delete" className="px-3 py-1.5 text-xs text-red-500 hover:text-red-600">Delete</Button>
                             </div>
                         </div>
                     ))

@@ -1,146 +1,121 @@
-# TP Backend -- Express, MongoDB, JWT, MVC
+# Veterinary Clinic Management System
 
-## Description
+Este proyecto es un sistema integral de gestión para una clínica veterinaria, que permite administrar Dueños, Mascotas, Profesionales (Veterinarios) e Historiales Médicos (Citas). Desarrollado como Trabajo Práctico Final.
 
-This project is a backend REST API built with **Node.js**, **Express**,
-and **MongoDB**, implementing **JWT authentication** and following the
-**MVC (Model--View--Controller)** architecture pattern.
+## 🚀 Tecnologías Utilizadas
 
-It allows users to register, log in, and manage a protected entity
-(**Tasks**) associated with the authenticated user.
+### Backend
+- **Node.js** & **Express**
+- **TypeScript** (Tipado estático para mayor robustez)
+- **MongoDB** & **Mongoose** (Base de datos NoSQL y ODM)
+- **JWT (JSON Web Tokens)** (Autenticación y protección de rutas)
+- **Bcrypt** (Encriptación de contraseñas)
+- **Express-Validator** (Validación de datos de entrada)
+- **Express-Rate-Limit** (Seguridad contra ataques de fuerza bruta)
 
-------------------------------------------------------------------------
+### Frontend
+- **React** (v18+) con **Vite**
+- **TypeScript**
+- **Modern CSS** (Diseño premium, Dark Mode, Micro-animaciones)
+- **Material Icons** (Iconografía)
 
-## Technologies
+---
 
--   Node.js
--   Express
--   MongoDB + Mongoose
--   JWT (JSON Web Tokens)
--   bcrypt
--   Thunder Client (API testing)
+## 🛠️ Instalación y Configuración
 
-------------------------------------------------------------------------
-
-## Installation
-
-1.  Clone the repository:
-
-``` bash
-git clone <repository-url>
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/ElTabor/tp-final-tomas-taboada.git
+cd tp-final-tomas-taboada
 ```
 
-2.  Install dependencies:
+### 2. Configuración del Backend
+Instale las dependencias en la raíz del proyecto:
+```bash
+npm install
+```
+Cree un archivo `.env` en la raíz basándose en `.env.example`:
+```env
+    PORT=3000
+    MONGO_URI=tu_conexion_mongodb
+    JWT_ACCESS_SECRET=tu_secreto_access
+    JWT_REFRESH_SECRET=tu_secreto_refresh
+```
 
-``` bash
+### 3. Configuración del Frontend
+Navegue a la carpeta frontend e instale las dependencias:
+```bash
+cd frontend
 npm install
 ```
 
-3.  Create a `.env` file based on `.env.example`.
+---
 
-------------------------------------------------------------------------
+## 🏃 Ejecución
 
-## Environment Variables
+### Modo Desarrollo
+Para ejecutar ambos simultáneamente (en terminales separadas):
 
-``` env
-PORT=3000
-MONGO_URI=mongodb://localhost:27017/tp-backend
-JWT_ACCESS_SECRET=your_access_secret
-JWT_REFRESH_SECRET=your_refresh_secret
-```
-
-------------------------------------------------------------------------
-
-## Run the Project
-
-``` bash
+**Backend:**
+```bash
+# En la raíz
 npm run dev
 ```
 
-The server will start on:
-
-    http://localhost:3000
-
-------------------------------------------------------------------------
-
-## Authentication Endpoints
-
-### Register
-
-**POST** `/api/auth/register`
-
-``` json
-{
-  "email": "user@test.com",
-  "password": "123456"
-}
+**Frontend:**
+```bash
+# En /frontend
+npm run dev
 ```
 
-### Login
-
-**POST** `/api/auth/login`
-
-``` json
-{
-  "email": "user@test.com",
-  "password": "123456"
-}
+### Seed de Datos (Opcional)
+Para poblar la base de datos con datos de prueba iniciales:
+```bash
+# En la raíz
+npx ts-node src/scripts/seed.ts
 ```
 
-Response:
+---
 
-``` json
-{
-  "token": "JWT_TOKEN"
-}
-```
+## 📡 Endpoints Principales (API)
 
-------------------------------------------------------------------------
+### Autenticación
+- `POST /api/auth/register` - Registrar un nuevo administrador.
+- `POST /api/auth/login` - Iniciar sesión y obtener tokens.
 
-## Protected Endpoints (Tasks)
+### Mascotas (Pets) - CRUD Completo
+- `GET /api/pets` - Listar todas las mascotas.
+- `GET /api/pets/:id` - Obtener detalle de una mascota.
+- `POST /api/pets` - Crear nueva mascota.
+- `PUT /api/pets/:id` - Actualizar mascota.
+- `DELETE /api/pets/:id` - Eliminar mascota.
 
-All protected routes require the header:
+### Dueños (Owners)
+- `GET /api/owners` - Listar dueños.
+- `POST /api/owners` - Crear dueño.
+- `PUT /api/owners/:id` - Actualizar dueño.
+- `DELETE /api/owners/:id` - Eliminar dueño.
 
-    Authorization: Bearer JWT_TOKEN
+### Veterinarios (Veterinarians)
+- `GET /api/veterinarians` - Listar profesionales.
+- `POST /api/veterinarians` - Agregar profesional.
+- `PUT /api/veterinarians/:id` - Editar profesional.
+- `DELETE /api/veterinarians/:id` - Eliminar profesional.
 
-### Get Tasks
+### Historial Médico / Citas (Medical Records)
+- `GET /api/medical-records` - Listar registros.
+- `POST /api/medical-records` - Crear nueva cita.
+- `PUT /api/medical-records/:id` - Editar registro.
+- `DELETE /api/medical-records/:id` - Eliminar registro.
 
-**GET** `/api/tasks`
+---
 
-### Create Task
+## 🎨 Frontend Utilizado
+El frontend fue desarrollado íntegramente en **React** utilizando el bundle tool **Vite**. Se optó por una estructura de **SPA (Single Page Application)** consumiendo la API REST del backend mediante `fetch`. 
 
-**POST** `/api/tasks`
-
-``` json
-{
-  "title": "My first task"
-}
-```
-
-### Update Task
-
-**PATCH** `/api/tasks/:id`
-
-``` json
-{
-  "title": "Updated task",
-  "completed": true
-}
-```
-
-### Delete Task
-
-**DELETE** `/api/tasks/:id`
-
-------------------------------------------------------------------------
-
-## API Testing
-
-All endpoints were tested using **Thunder Client**.\
-The exported collection is included in the repository.
-
-------------------------------------------------------------------------
-
-## Author
-
-Tomás Taboada
+**Características destacadas del Frontend:**
+- **Dashboard Interactivo**: Con métricas en tiempo real y log de actividad.
+- **Búsqueda y Filtrado**: En todas las tablas de datos.
+- **Modales de Confirmación**: Para todas las acciones destructivas (Eliminar).
+- **Responsive Design**: Adaptado para móviles y desktop.
+- **Dark/Light Mode**: Soporte nativo para temas de color.

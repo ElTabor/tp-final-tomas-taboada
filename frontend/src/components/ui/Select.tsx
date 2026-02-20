@@ -13,6 +13,7 @@ interface SelectProps {
     placeholder?: string;
     required?: boolean;
     icon?: string;
+    className?: string;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -22,7 +23,8 @@ export const Select: React.FC<SelectProps> = ({
     onChange,
     placeholder = 'Search or select...',
     required,
-    icon
+    icon,
+    className = "w-full"
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -50,9 +52,14 @@ export const Select: React.FC<SelectProps> = ({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filteredOptions = options.filter(o =>
-        o.label.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredOptions = options.filter(o => {
+        // If the search text matches the currently selected value, show all options
+        // This prevents the dropdown from filtering itself when opened with a value selected
+        if (selectedOption && search === selectedOption.label) {
+            return true;
+        }
+        return o.label.toLowerCase().includes(search.toLowerCase());
+    });
 
     const handleInputFocus = () => {
         setIsOpen(true);
@@ -70,7 +77,7 @@ export const Select: React.FC<SelectProps> = ({
     };
 
     return (
-        <div className={`w-full relative ${isOpen ? 'z-50' : 'z-0'}`} ref={containerRef}>
+        <div className={`relative ${isOpen ? 'z-50' : 'z-0'} ${className}`} ref={containerRef}>
             {label && (
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     {label} {required && <span className="text-red-500">*</span>}
@@ -78,15 +85,23 @@ export const Select: React.FC<SelectProps> = ({
             )}
 
             <div className="relative group">
+                {/* Ghost element for auto-width */}
+                <div
+                    aria-hidden="true"
+                    className={`invisible whitespace-nowrap overflow-hidden py-2.5 ${icon ? 'pl-11' : 'pl-4'} pr-10 text-sm font-medium border border-transparent`}
+                >
+                    {search || placeholder}
+                </div>
+
                 {icon && (
-                    <span className="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none group-focus-within:text-primary transition-colors">
+                    <span className="material-icons absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none group-focus-within:text-primary transition-colors z-10">
                         {icon}
                     </span>
                 )}
                 <input
                     ref={inputRef}
                     type="text"
-                    className={`block w-full ${icon ? 'pl-11' : 'pl-4'} pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none cursor-text font-medium`}
+                    className={`absolute inset-0 block w-full h-full ${icon ? 'pl-11' : 'pl-4'} pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none cursor-text font-medium`}
                     placeholder={placeholder}
                     value={search}
                     onChange={handleInputChange}
@@ -94,7 +109,7 @@ export const Select: React.FC<SelectProps> = ({
                     required={required && !value}
                 />
                 <span
-                    className={`material-icons absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-transform cursor-pointer pointer-events-none ${isOpen ? 'rotate-180' : ''}`}
+                    className={`material-icons absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-transform cursor-pointer pointer-events-none ${isOpen ? 'rotate-180' : ''} z-10`}
                 >
                     expand_more
                 </span>
